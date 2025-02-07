@@ -33,111 +33,75 @@ Delivery Time: Products with longer delivery times tend to have higher transacti
 SQL Scripts for Data Exploration
 Below are some SQL scripts that can be used to explore the dataset and generate the metrics mentioned above. You can share these scripts via a GitHub link.
 
-1. Total Sales
-sql
- 
-SELECT SUM(TransactionAmount) AS TotalSales
-FROM assessment_dataset;
+--1. Key Aggregate Insights
+--Total Sales & Average Order Value
 
-2. Payment Methods Distribution
-sql
- 
-SELECT PaymentMethod, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
+SELECT 
+    SUM(TransactionAmount) AS Total_Sales,
+    AVG(TransactionAmount) AS Avg_Order_Value,
+    SUM(Quantity) AS Total_Quantity_Sold,
+    AVG(DiscountPercent) AS Avg_Discount
+FROM sales_data;
+
+--Sales by Payment Method
+
+SELECT PaymentMethod, COUNT(*) AS Num_Transactions, SUM(TransactionAmount) AS Total_Sales
+FROM sales_data
 GROUP BY PaymentMethod
-ORDER BY TotalAmount DESC;
+ORDER BY Total_Sales DESC;
 
-3. Product Categories Sales
-sql
- 
-SELECT ProductName, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
-GROUP BY ProductName
-ORDER BY TotalAmount DESC;
+--Sales by Store Type
 
-4. Regional Sales
-sql
- 
-SELECT Region, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
+SELECT StoreType, COUNT(*) AS Num_Transactions, SUM(TransactionAmount) AS Total_Sales
+FROM sales_data
+GROUP BY StoreType;
+
+
+--Regional Sales Performance
+
+
+SELECT Region, SUM(TransactionAmount) AS Total_Sales, COUNT(*) AS Num_Transactions
+FROM sales_data
 GROUP BY Region
-ORDER BY TotalAmount DESC;
+ORDER BY Total_Sales DESC;
 
-5. Customer Demographics
-sql
- 
-SELECT CustomerAge, CustomerGender, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
-GROUP BY CustomerAge, CustomerGender
-ORDER BY CustomerAge, TotalAmount DESC;
 
-6. Discount Analysis
-    
-sql
- 
-SELECT DiscountPercent, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
-GROUP BY DiscountPercent
-ORDER BY DiscountPercent DESC;
+--Customer Demographics Analysis
 
-7. Return Analysis
-sql
- 
-SELECT Returned, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
-GROUP BY Returned;
+SELECT CustomerGender, COUNT(*) AS Num_Customers, SUM(TransactionAmount) AS Total_Sales
+FROM sales_data
+GROUP BY CustomerGender;
 
-8. Promotional Impact
-sql
- 
-SELECT IsPromotional, COUNT(*) AS TransactionCount, AVG(TransactionAmount) AS AverageAmount
-FROM assessment_dataset
+
+--Promotional Sales Impact
+
+SELECT 
+    IsPromotional,
+    SUM(TransactionAmount) AS Total_Sales,
+    AVG(DiscountPercent) AS Avg_Discount
+FROM sales_data
 GROUP BY IsPromotional;
 
-9. High-Value Transactions
-sql
- 
-SELECT ProductName, AVG(TransactionAmount) AS AverageAmount
-FROM assessment_dataset
-GROUP BY ProductName
-ORDER BY AverageAmount DESC;
 
-10. City-wise Sales
-sql
- 
-SELECT City, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
-GROUP BY City
-ORDER BY TotalAmount DESC;
+--2. Drill Down Insights
+--High-Value Transactions (Above $50,000)
+SELECT * FROM sales_data WHERE TransactionAmount > 50000 ORDER BY TransactionAmount DESC;
 
-11. Store Type Analysis
-sql
- 
-SELECT StoreType, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
-GROUP BY StoreType
-ORDER BY TotalAmount DESC;
 
-12. Customer Loyalty Analysis
-sql
- 
-SELECT LoyaltyPoints, COUNT(*) AS TransactionCount, SUM(TransactionAmount) AS TotalAmount
-FROM assessment_dataset
-GROUP BY LoyaltyPoints
-ORDER BY LoyaltyPoints DESC;
+--Discount Impact on Sales
+SELECT 
+    CASE 
+        WHEN DiscountPercent > 20 THEN 'High Discount'
+        ELSE 'Low Discount'
+    END AS Discount_Category,
+    SUM(TransactionAmount) AS Total_Sales,
+    COUNT(*) AS Num_Transactions
+FROM sales_data
+GROUP BY Discount_Category;
 
-13. Shipping Costs Analysis
-sql
- 
-SELECT ProductName, AVG(ShippingCost) AS AverageShippingCost
-FROM assessment_dataset
-GROUP BY ProductName
-ORDER BY AverageShippingCost DESC;
 
-14. Delivery Time Analysis
-sql
- 
-SELECT ProductName, AVG(DeliveryTimeDays) AS AverageDeliveryTime
-FROM assessment_dataset
-GROUP BY ProductName
-ORDER BY AverageDeliveryTime DESC;
+--Fastest & Slowest Deliveries
+
+SELECT ProductName, City, DeliveryTimeDays 
+FROM sales_data 
+ORDER BY DeliveryTimeDays ASC;
